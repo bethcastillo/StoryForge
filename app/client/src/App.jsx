@@ -919,6 +919,7 @@ function ScenesView({ project, onProjectUpdate }) {
   const [showForm, setShowForm] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [selectedScene, setSelectedScene] = useState(null);
 
   const [form, setForm] = useState({
     title: "",
@@ -996,6 +997,21 @@ function ScenesView({ project, onProjectUpdate }) {
     } finally {
       setSaving(false);
     }
+  }
+
+  if (selectedScene) {
+    const currentScene =
+      project.scenes?.find((scene) => scene.id === selectedScene.id) ||
+      selectedScene;
+
+    return (
+      <SceneDetail
+        project={project}
+        scene={currentScene}
+        onBack={() => setSelectedScene(null)}
+        onProjectUpdate={onProjectUpdate}
+      />
+    );
   }
 
   return (
@@ -1175,8 +1191,9 @@ function ScenesView({ project, onProjectUpdate }) {
 
             return (
               <article
-                className='scene-card'
+                className='scene-card clickable'
                 key={scene.id}
+                onClick={() => setSelectedScene(scene)}
               >
                 <div className='scene-number'>Scene {index + 1}</div>
 
@@ -1218,6 +1235,385 @@ function ScenesView({ project, onProjectUpdate }) {
         </section>
       )}
     </>
+  );
+}
+
+function SceneDetail({ project, scene, onBack, onProjectUpdate }) {
+  const [editing, setEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState("");
+
+  const [form, setForm] = useState({
+    title: scene.title || "",
+    location: scene.location || "",
+    action: scene.action || "",
+    camera: scene.camera || "",
+    duration: scene.duration || 5,
+    aspectRatio: scene.aspectRatio || "16:9",
+    characterIds: scene.characterIds || [],
+  });
+
+  function updateField(event) {
+    const { name, value } = event.target;
+
+    setForm((current) => ({
+      ...current,
+      [name]: value,
+    }));
+  }
+
+  function toggleCharacter(characterId) {
+    setForm((current) => ({
+      ...current,
+
+      characterIds: current.characterIds.includes(characterId)
+        ? current.characterIds.filter((id) => id !== characterId)
+        : [...current.characterIds, characterId],
+    }));
+  }
+
+  async function saveScene(event) {
+    event.preventDefault();
+
+    try {
+      setSaving(true);
+      setError("");
+
+      const response = await fetch(
+        `${API_URL}/projects/${project.id}/scenes/${scene.id}`,
+        {
+          method: "PATCH",
+
+          headers: {
+            "Content-Type": "application/json",
+          },
+
+          body: JSON.stringify(form),
+        },
+      );
+
+      if (!response.ok) {
+        const result = await response.json();
+
+        throw new Error(result.error || "Could not update scene.");
+      }
+
+      const result = await response.json();
+
+      onProjectUpdate(result.project);
+      setEditing(false);
+    } catch (err) {
+      console.error(err);
+
+      setError(err.message || "Could not update scene.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function uploadStartingFrame(event) {
+    const file = event.target.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    try {
+      setUploading(true);
+      setError("");
+
+      const formData = new FormData();
+
+      formData.append("image", file);
+
+      const response = await fetch(
+        `${API_URL}/projects/${project.id}` +
+          `/scenes/${scene.id}` +
+          `/starting-frame`,
+        {
+          method: "POST",
+          body: formData,
+        },
+      );
+
+      if (!response.ok) {
+        const result = await response.json();
+
+        throw new Error(result.error || "Could not upload starting frame.");
+      }
+
+      const result = await response.json();
+
+      onProjectUpdate(result.project);
+    } catch (err) {
+      console.error(err);
+
+      setError(err.message || "Could not upload starting frame.");
+    } finally {
+      setUploading(false);
+      event.target.value = "";
+    }
+  }
+
+  const cast =
+    project.characters?.filter((character) =>
+      scene.characterIds?.includes(character.id),
+    ) || [];
+
+  return (
+    <>
+      <section className='character-detail-header'>
+        <button
+          className='back-button'
+          onClick={onBack}
+        >
+          ← Scenes
+        </button>
+
+        <div>
+          <h2>{scene.title}</h2>
+
+          <p>{scene.location || "No location"}</p>
+        </div>
+      </section>
+
+      {error && <div className='error-message'>{error}</div>}
+
+      <div className='scene-detail-toolbar'>
+        <button
+          className='secondary-button'
+          onClick={() => setEditing(!editing)}
+        >
+          {editing ? "Cancel Edit" : "Edit Scene"}
+        </button>
+      </div>
+
+      {editing ? (
+        <form
+          className='character-form scene-edit-form'
+          onSubmit={saveScene}
+        >
+          <div className='form-row'>
+            <label>
+              Scene Title
+              <input
+                name='title'
+                value={form.title}
+                onChange={updateField}
+              />
+            </label>
+
+            <label>
+              Location
+              <input
+                name='location'
+                value={form.location}
+                onChange={updateField}
+              />
+            </label>
+          </div>
+
+          <label>
+            Action
+            <textarea
+              name='action'
+              rows='5'
+              value={form.action}
+              onChange={updateField}
+            />
+          </label>
+
+          <label>
+            Camera
+            <textarea
+              name='camera'
+              rows='3'
+              value={form.camera}
+              onChange={updateField}
+            />
+          </label>
+
+          <div className='form-row'>
+            <label>
+              Duration
+              <input
+                name='duration'
+                type='number'
+                min='1'
+                max='30'
+                value={form.duration}
+                onChange={updateField}
+              />
+            </label>
+
+            <label>
+              Aspect Ratio
+              <select
+                name='aspectRatio'
+                value={form.aspectRatio}
+                onChange={updateField}
+              >
+                <option value='16:9'>16:9 Widescreen</option>
+
+                <option value='9:16'>9:16 Vertical</option>
+
+                <option value='1:1'>1:1 Square</option>
+              </select>
+            </label>
+          </div>
+
+          <fieldset className='scene-characters'>
+            <legend>Characters</legend>
+
+            {project.characters?.map((character) => (
+              <label
+                className='character-check'
+                key={character.id}
+              >
+                <input
+                  type='checkbox'
+                  checked={form.characterIds.includes(character.id)}
+                  onChange={() => toggleCharacter(character.id)}
+                />
+
+                <span>{character.name}</span>
+              </label>
+            ))}
+          </fieldset>
+
+          <div className='form-actions'>
+            <button
+              type='submit'
+              className='primary-button'
+              disabled={saving}
+            >
+              {saving ? "Saving..." : "Save Changes"}
+            </button>
+          </div>
+        </form>
+      ) : (
+        <section className='scene-detail-grid'>
+          <div className='scene-info-panel'>
+            <h3>Scene Brief</h3>
+
+            <SceneField
+              title='Action'
+              value={scene.action}
+            />
+
+            <SceneField
+              title='Camera'
+              value={scene.camera}
+            />
+
+            <SceneField
+              title='Duration'
+              value={`${scene.duration} seconds`}
+            />
+
+            <SceneField
+              title='Aspect Ratio'
+              value={scene.aspectRatio}
+            />
+
+            <div className='character-field'>
+              <h4>Characters</h4>
+
+              {cast.length > 0 ? (
+                <div className='scene-cast-detail'>
+                  {cast.map((character) => {
+                    const primary =
+                      character.referenceImages?.find(
+                        (image) => image.isPrimary,
+                      ) || character.referenceImages?.[0];
+
+                    return (
+                      <div
+                        className='scene-character-row'
+                        key={character.id}
+                      >
+                        <div className='scene-character-thumb'>
+                          {primary ? (
+                            <img
+                              src={`http://localhost:3001` + primary.url}
+                              alt={character.name}
+                            />
+                          ) : (
+                            <span>🐾</span>
+                          )}
+                        </div>
+
+                        <span>{character.name}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <p>No characters selected.</p>
+              )}
+            </div>
+          </div>
+
+          <div className='starting-frame-panel'>
+            <div className='reference-header'>
+              <div>
+                <h3>Starting Frame</h3>
+
+                <p>The visual frame this scene should begin from.</p>
+              </div>
+
+              <label className='upload-button'>
+                {uploading
+                  ? "Uploading..."
+                  : scene.startingFrame
+                    ? "Replace Frame"
+                    : "+ Add Frame"}
+
+                <input
+                  type='file'
+                  accept='image/png,image/jpeg,image/webp'
+                  onChange={uploadStartingFrame}
+                  disabled={uploading}
+                />
+              </label>
+            </div>
+
+            {scene.startingFrame ? (
+              <div className='starting-frame-preview'>
+                <img
+                  src={`http://localhost:3001` + scene.startingFrame.url}
+                  alt={`${scene.title} starting frame`}
+                />
+
+                <small>{scene.startingFrame.originalName}</small>
+              </div>
+            ) : (
+              <div className='reference-empty'>
+                <div>🎞️</div>
+
+                <strong>No starting frame yet</strong>
+
+                <p>
+                  Upload an image now. Later, StoryForge will also be able to
+                  generate this frame from the scene and character references.
+                </p>
+              </div>
+            )}
+          </div>
+        </section>
+      )}
+    </>
+  );
+}
+
+function SceneField({ title, value }) {
+  return (
+    <div className='character-field'>
+      <h4>{title}</h4>
+
+      <p>{value || "Not defined yet."}</p>
+    </div>
   );
 }
 

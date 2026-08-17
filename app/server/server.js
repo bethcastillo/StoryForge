@@ -41,6 +41,34 @@ const referenceImageStorage = multer.diskStorage({
   },
 });
 
+const sceneImageStorage = multer.diskStorage({
+  destination: async (req, file, cb) => {
+    try {
+      const { projectId, sceneId } = req.params;
+
+      const directory = path.join(
+        ASSETS_DIR,
+        "projects",
+        projectId,
+        "scenes",
+        sceneId,
+      );
+
+      await fs.mkdir(directory, { recursive: true });
+
+      cb(null, directory);
+    } catch (error) {
+      cb(error);
+    }
+  },
+
+  filename: (req, file, cb) => {
+    const extension = path.extname(file.originalname).toLowerCase();
+
+    cb(null, `${crypto.randomUUID()}${extension}`);
+  },
+});
+
 const upload = multer({
   storage: referenceImageStorage,
 
@@ -61,6 +89,24 @@ const upload = multer({
 app.use(cors());
 app.use(express.json());
 app.use("/assets", express.static(ASSETS_DIR));
+
+const sceneImageUpload = multer({
+  storage: sceneImageStorage,
+
+  limits: {
+    fileSize: 15 * 1024 * 1024,
+  },
+
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+
+    if (!allowedTypes.includes(file.mimetype)) {
+      return cb(new Error("Only JPEG, PNG, and WebP images are allowed."));
+    }
+
+    cb(null, true);
+  },
+});
 
 // Make sure the projects directory exists.
 async function ensureProjectsDirectory() {
@@ -547,6 +593,183 @@ app.post("/api/projects/:projectId/scenes", async (req, res) => {
     });
   }
 });
+
+app.patch("/api/projects/:projectId/scenes/:sceneId", async (req, res) => {
+  try {
+    const { projectId, sceneId } = req.params;
+
+    const projectPath = path.join(PROJECTS_DIR, `${projectId}.json`);
+
+    let contents;
+
+    try {
+      contents = await fs.readFile(projectPath, "utf8");
+    } catch {
+      return res.status(404).json({
+        error: "Project not found.",
+      });
+    }
+
+    const project = JSON.parse(contents);
+
+    const scene = project.scenes?.find((item) => item.id === sceneId);
+
+    if (!scene) {
+      return res.status(404).json({
+        error: "Scene not found.",
+      });
+    }
+
+    const {
+      title,
+      location,
+      action,
+      camera,
+      duration,
+      aspectRatio,
+      characterIds,
+    } = req.body;
+
+    if (typeof title === "string") {
+      if (!title.trim()) {
+        return res.status(400).json({
+          error: "Scene title is required.",
+        });
+      }
+
+      scene.title = title.trim();
+    }
+
+    if (typeof location === "string") {
+      scene.location = location.trim();
+    }
+
+    if (typeof action === "string") {
+      scene.action = action.trim();
+    }
+
+    if (typeof camera === "string") {
+      scene.camera = camera.trim();
+    }
+
+    if (duration !== undefined) {
+      scene.duration = Number(duration) || 5;
+    }
+
+    if (typeof aspectRatio === "string") {
+      scene.aspectRatio = aspectRatio;
+    }
+
+    if (Array.isArray(characterIds)) {
+      scene.characterIds = characterIds;
+    }
+
+    scene.updatedAt = new Date().toISOString();
+    project.updatedAt = new Date().toISOString();
+
+    await fs.writeFile(projectPath, JSON.stringify(project, null, 2), "utf8");
+
+    res.json({
+      scene,
+      project,
+    });
+  } catch (error) {
+    console.error("Could not update scene:", error);
+
+    res.status(500).json({
+      error: "Could not update scene.",
+    });
+  }
+});
+
+app.post(
+  "/api/projects/:projectId/scenes/:sceneId/starting-frame",
+  sceneImageUpload.single("image"),
+  async (req, res) => {
+    try {
+      const { projectId, sceneId } = req.params;
+
+      if (!req.file) {
+        return res.status(400).json({
+          error: "Image file is required.",
+        });
+      }
+
+      const projectPath = path.join(PROJECTS_DIR, `${projectId}.json`);
+
+      let contents;
+
+      try {
+        contents = await fs.readFile(projectPath, "utf8");
+      } catch {
+        return res.status(404).json({
+          error: "Project not found.",
+        });
+      }
+
+      const project = JSON.parse(contents);
+
+      const scene = project.scenes?.find((item) => item.id === sceneId);
+
+      if (!scene) {
+        return res.status(404).json({
+          error: "Scene not found.",
+        });
+      }
+
+      // Remove the previous starting frame file if one exists.
+      if (scene.startingFrame?.filename) {
+        const oldPath = path.join(
+          ASSETS_DIR,
+          "projects",
+          projectId,
+          "scenes",
+          sceneId,
+          scene.startingFrame.filename,
+        );
+
+        try {
+          await fs.unlink(oldPath);
+        } catch (error) {
+          if (error.code !== "ENOENT") {
+            throw error;
+          }
+        }
+      }
+
+      scene.startingFrame = {
+        id: crypto.randomUUID(),
+        filename: req.file.filename,
+        originalName: req.file.originalname,
+        mimeType: req.file.mimetype,
+        size: req.file.size,
+
+        url:
+          `/assets/projects/${projectId}` +
+          `/scenes/${sceneId}` +
+          `/${req.file.filename}`,
+
+        createdAt: new Date().toISOString(),
+      };
+
+      scene.updatedAt = new Date().toISOString();
+      project.updatedAt = new Date().toISOString();
+
+      await fs.writeFile(projectPath, JSON.stringify(project, null, 2), "utf8");
+
+      res.status(201).json({
+        scene,
+        project,
+      });
+    } catch (error) {
+      console.error("Could not upload starting frame:", error);
+
+      res.status(500).json({
+        error: error.message || "Could not upload starting frame.",
+      });
+    }
+  },
+);
 
 Promise.all([ensureProjectsDirectory(), ensureAssetsDirectory()])
   .then(() => {
