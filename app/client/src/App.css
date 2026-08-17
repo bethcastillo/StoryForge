@@ -609,3 +609,101 @@ button {
     grid-template-columns: 1fr;
   }
 }
+
+.character-avatar {
+  overflow: hidden;
+}
+
+.character-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.reference-card {
+  overflow: visible;
+}
+
+.reference-image-wrapper {
+  position: relative;
+  overflow: hidden;
+  border-radius: 10px 10px 0 0;
+}
+
+.primary-reference {
+  border-color: #a78bfa;
+  box-shadow: 0 0 0 1px #7c3aed;
+}
+
+.primary-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  padding: 6px 9px;
+  background: #7c3aed;
+  color: white;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.reference-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px;
+}
+
+.reference-controls label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: #d1d5db;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.reference-controls select,
+.reference-controls textarea {
+  width: 100%;
+  padding: 9px 10px;
+  color: #f9fafb;
+  background: #111827;
+  border: 1px solid #4b5563;
+  border-radius: 7px;
+  font: inherit;
+}
+
+.reference-controls textarea {
+  resize: vertical;
+}
+
+.reference-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.reference-actions button {
+  font-size: 0.8rem;
+}
+
+.danger-button {
+  padding: 10px 14px;
+  color: #fecaca;
+  background: #7f1d1d;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.danger-button:hover {
+  background: #991b1b;
+}
+
+.reference-filename {
+  overflow: hidden;
+  color: #6b7280;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

@@ -260,17 +260,27 @@ app.post(
         });
       }
 
+      const isFirstImage =
+        !character.referenceImages || character.referenceImages.length === 0;
+
       const image = {
         id: crypto.randomUUID(),
         filename: req.file.filename,
         originalName: req.file.originalname,
         mimeType: req.file.mimetype,
         size: req.file.size,
+
         url:
           `/assets/projects/${projectId}` +
           `/characters/${characterId}` +
           `/${req.file.filename}`,
+
+        label: isFirstImage ? "Primary" : "Unlabeled",
+        note: "",
+        isPrimary: isFirstImage,
+
         createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       };
 
       character.referenceImages = character.referenceImages || [];
@@ -292,6 +302,179 @@ app.post(
 
       res.status(500).json({
         error: error.message || "Could not upload reference image.",
+      });
+    }
+  },
+);
+
+app.patch(
+  "/api/projects/:projectId/characters/:characterId/reference-images/:imageId",
+  async (req, res) => {
+    try {
+      const { projectId, characterId, imageId } = req.params;
+
+      const { label, note, isPrimary } = req.body;
+
+      const projectPath = path.join(PROJECTS_DIR, `${projectId}.json`);
+
+      let contents;
+
+      try {
+        contents = await fs.readFile(projectPath, "utf8");
+      } catch {
+        return res.status(404).json({
+          error: "Project not found.",
+        });
+      }
+
+      const project = JSON.parse(contents);
+
+      const character = project.characters?.find(
+        (item) => item.id === characterId,
+      );
+
+      if (!character) {
+        return res.status(404).json({
+          error: "Character not found.",
+        });
+      }
+
+      const image = character.referenceImages?.find(
+        (item) => item.id === imageId,
+      );
+
+      if (!image) {
+        return res.status(404).json({
+          error: "Reference image not found.",
+        });
+      }
+
+      if (typeof label === "string") {
+        image.label = label.trim() || "Unlabeled";
+      }
+
+      if (typeof note === "string") {
+        image.note = note.trim();
+      }
+
+      if (isPrimary === true) {
+        character.referenceImages.forEach((item) => {
+          item.isPrimary = false;
+        });
+
+        image.isPrimary = true;
+
+        if (!image.label || image.label === "Unlabeled") {
+          image.label = "Primary";
+        }
+      }
+
+      image.updatedAt = new Date().toISOString();
+
+      character.updatedAt = new Date().toISOString();
+
+      project.updatedAt = new Date().toISOString();
+
+      await fs.writeFile(projectPath, JSON.stringify(project, null, 2), "utf8");
+
+      res.json({
+        image,
+        project,
+      });
+    } catch (error) {
+      console.error("Could not update reference image:", error);
+
+      res.status(500).json({
+        error: "Could not update reference image.",
+      });
+    }
+  },
+);
+
+app.delete(
+  "/api/projects/:projectId/characters/:characterId/reference-images/:imageId",
+  async (req, res) => {
+    try {
+      const { projectId, characterId, imageId } = req.params;
+
+      const projectPath = path.join(PROJECTS_DIR, `${projectId}.json`);
+
+      let contents;
+
+      try {
+        contents = await fs.readFile(projectPath, "utf8");
+      } catch {
+        return res.status(404).json({
+          error: "Project not found.",
+        });
+      }
+
+      const project = JSON.parse(contents);
+
+      const character = project.characters?.find(
+        (item) => item.id === characterId,
+      );
+
+      if (!character) {
+        return res.status(404).json({
+          error: "Character not found.",
+        });
+      }
+
+      const imageIndex = character.referenceImages?.findIndex(
+        (item) => item.id === imageId,
+      );
+
+      if (imageIndex === undefined || imageIndex < 0) {
+        return res.status(404).json({
+          error: "Reference image not found.",
+        });
+      }
+
+      const [removedImage] = character.referenceImages.splice(imageIndex, 1);
+
+      const imagePath = path.join(
+        ASSETS_DIR,
+        "projects",
+        projectId,
+        "characters",
+        characterId,
+        removedImage.filename,
+      );
+
+      try {
+        await fs.unlink(imagePath);
+      } catch (error) {
+        if (error.code !== "ENOENT") {
+          throw error;
+        }
+      }
+
+      if (removedImage.isPrimary && character.referenceImages.length > 0) {
+        character.referenceImages[0].isPrimary = true;
+
+        if (
+          !character.referenceImages[0].label ||
+          character.referenceImages[0].label === "Unlabeled"
+        ) {
+          character.referenceImages[0].label = "Primary";
+        }
+      }
+
+      character.updatedAt = new Date().toISOString();
+
+      project.updatedAt = new Date().toISOString();
+
+      await fs.writeFile(projectPath, JSON.stringify(project, null, 2), "utf8");
+
+      res.json({
+        project,
+      });
+    } catch (error) {
+      console.error("Could not delete reference image:", error);
+
+      res.status(500).json({
+        error: "Could not delete reference image.",
       });
     }
   },

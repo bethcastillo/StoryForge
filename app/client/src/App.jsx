@@ -528,7 +528,23 @@ function CharactersView({ project, onProjectUpdate }) {
               className='character-card clickable'
               onClick={() => setSelectedCharacter(character)}
             >
-              <div className='character-avatar'>🐾</div>
+              <div className='character-avatar'>
+                {character.referenceImages?.length > 0 ? (
+                  <img
+                    src={
+                      `http://localhost:3001` +
+                      (
+                        character.referenceImages.find(
+                          (image) => image.isPrimary,
+                        ) || character.referenceImages[0]
+                      ).url
+                    }
+                    alt={character.name}
+                  />
+                ) : (
+                  <span>🐾</span>
+                )}
+              </div>
 
               <div>
                 <h3>{character.name}</h3>
@@ -599,6 +615,76 @@ function CharacterDetail({ project, character, onBack, onProjectUpdate }) {
     }
   }
 
+  async function updateReferenceImage(imageId, changes) {
+    try {
+      setError("");
+
+      const response = await fetch(
+        `${API_URL}/projects/${project.id}` +
+          `/characters/${character.id}` +
+          `/reference-images/${imageId}`,
+        {
+          method: "PATCH",
+
+          headers: {
+            "Content-Type": "application/json",
+          },
+
+          body: JSON.stringify(changes),
+        },
+      );
+
+      if (!response.ok) {
+        const result = await response.json();
+
+        throw new Error(result.error || "Could not update image.");
+      }
+
+      const result = await response.json();
+
+      onProjectUpdate(result.project);
+    } catch (err) {
+      console.error(err);
+
+      setError(err.message || "Could not update image.");
+    }
+  }
+
+  async function deleteReferenceImage(image) {
+    const confirmed = window.confirm(`Delete ${image.originalName}?`);
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      setError("");
+
+      const response = await fetch(
+        `${API_URL}/projects/${project.id}` +
+          `/characters/${character.id}` +
+          `/reference-images/${image.id}`,
+        {
+          method: "DELETE",
+        },
+      );
+
+      if (!response.ok) {
+        const result = await response.json();
+
+        throw new Error(result.error || "Could not delete image.");
+      }
+
+      const result = await response.json();
+
+      onProjectUpdate(result.project);
+    } catch (err) {
+      console.error(err);
+
+      setError(err.message || "Could not delete image.");
+    }
+  }
+
   return (
     <>
       <section className='character-detail-header'>
@@ -666,17 +752,13 @@ function CharacterDetail({ project, character, onBack, onProjectUpdate }) {
           {character.referenceImages?.length > 0 ? (
             <div className='reference-grid'>
               {character.referenceImages.map((image) => (
-                <figure
-                  className='reference-card'
+                <ReferenceImageCard
                   key={image.id}
-                >
-                  <img
-                    src={`http://localhost:3001` + image.url}
-                    alt={`${character.name} reference`}
-                  />
-
-                  <figcaption>{image.originalName}</figcaption>
-                </figure>
+                  character={character}
+                  image={image}
+                  onUpdate={updateReferenceImage}
+                  onDelete={deleteReferenceImage}
+                />
               ))}
             </div>
           ) : (
@@ -694,6 +776,119 @@ function CharacterDetail({ project, character, onBack, onProjectUpdate }) {
         </div>
       </section>
     </>
+  );
+}
+
+function ReferenceImageCard({ character, image, onUpdate, onDelete }) {
+  const [label, setLabel] = useState(image.label || "Unlabeled");
+
+  const [note, setNote] = useState(image.note || "");
+
+  const [saving, setSaving] = useState(false);
+
+  const referenceTypes = [
+    "Unlabeled",
+    "Primary",
+    "Front",
+    "Side",
+    "Rear",
+    "Three-Quarter",
+    "Flying",
+    "Expression",
+    "Detail",
+    "Other",
+  ];
+
+  async function saveMetadata() {
+    setSaving(true);
+
+    await onUpdate(image.id, {
+      label,
+      note,
+    });
+
+    setSaving(false);
+  }
+
+  async function makePrimary() {
+    await onUpdate(image.id, {
+      isPrimary: true,
+    });
+  }
+
+  return (
+    <article
+      className={`reference-card ${image.isPrimary ? "primary-reference" : ""}`}
+    >
+      <div className='reference-image-wrapper'>
+        <img
+          src={`http://localhost:3001` + image.url}
+          alt={`${character.name} reference`}
+        />
+
+        {image.isPrimary && <span className='primary-badge'>★ Primary</span>}
+      </div>
+
+      <div className='reference-controls'>
+        <label>
+          View
+          <select
+            value={label}
+            onChange={(event) => setLabel(event.target.value)}
+          >
+            {referenceTypes.map((type) => (
+              <option
+                key={type}
+                value={type}
+              >
+                {type}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label>
+          Notes
+          <textarea
+            rows='3'
+            value={note}
+            onChange={(event) => setNote(event.target.value)}
+            placeholder='Best wing reference, correct eye color...'
+          />
+        </label>
+
+        <div className='reference-actions'>
+          {!image.isPrimary && (
+            <button
+              type='button'
+              className='secondary-button'
+              onClick={makePrimary}
+            >
+              ★ Make Primary
+            </button>
+          )}
+
+          <button
+            type='button'
+            className='secondary-button'
+            onClick={saveMetadata}
+            disabled={saving}
+          >
+            {saving ? "Saving..." : "Save"}
+          </button>
+
+          <button
+            type='button'
+            className='danger-button'
+            onClick={() => onDelete(image)}
+          >
+            Delete
+          </button>
+        </div>
+
+        <small className='reference-filename'>{image.originalName}</small>
+      </div>
+    </article>
   );
 }
 
