@@ -480,6 +480,74 @@ app.delete(
   },
 );
 
+app.post("/api/projects/:projectId/scenes", async (req, res) => {
+  try {
+    const { projectId } = req.params;
+
+    const {
+      title,
+      location,
+      action,
+      camera,
+      duration,
+      aspectRatio,
+      characterIds,
+    } = req.body;
+
+    if (!title?.trim()) {
+      return res.status(400).json({
+        error: "Scene title is required.",
+      });
+    }
+
+    const projectPath = path.join(PROJECTS_DIR, `${projectId}.json`);
+
+    let contents;
+
+    try {
+      contents = await fs.readFile(projectPath, "utf8");
+    } catch {
+      return res.status(404).json({
+        error: "Project not found.",
+      });
+    }
+
+    const project = JSON.parse(contents);
+
+    const scene = {
+      id: crypto.randomUUID(),
+      title: title.trim(),
+      location: location?.trim() || "",
+      action: action?.trim() || "",
+      camera: camera?.trim() || "",
+      duration: Number(duration) || 5,
+      aspectRatio: aspectRatio || "16:9",
+      characterIds: Array.isArray(characterIds) ? characterIds : [],
+      startingFrame: null,
+      renders: [],
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    project.scenes = project.scenes || [];
+    project.scenes.push(scene);
+    project.updatedAt = new Date().toISOString();
+
+    await fs.writeFile(projectPath, JSON.stringify(project, null, 2), "utf8");
+
+    res.status(201).json({
+      scene,
+      project,
+    });
+  } catch (error) {
+    console.error("Could not create scene:", error);
+
+    res.status(500).json({
+      error: "Could not create scene.",
+    });
+  }
+});
+
 Promise.all([ensureProjectsDirectory(), ensureAssetsDirectory()])
   .then(() => {
     app.listen(PORT, () => {

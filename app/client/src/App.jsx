@@ -214,7 +214,14 @@ function ProjectWorkspace({ project, onBack, onProjectUpdate }) {
               Characters
             </button>
 
-            <button className='nav-button'>Scenes</button>
+            <button
+              className={`nav-button ${
+                activeView === "scenes" ? "active" : ""
+              }`}
+              onClick={() => setActiveView("scenes")}
+            >
+              Scenes
+            </button>
 
             <button className='nav-button'>Storyboard</button>
 
@@ -235,6 +242,12 @@ function ProjectWorkspace({ project, onBack, onProjectUpdate }) {
 
           {activeView === "characters" && (
             <CharactersView
+              project={project}
+              onProjectUpdate={onProjectUpdate}
+            />
+          )}
+          {activeView === "scenes" && (
+            <ScenesView
               project={project}
               onProjectUpdate={onProjectUpdate}
             />
@@ -899,6 +912,312 @@ function CharacterField({ title, value }) {
 
       <p>{value || "Not defined yet."}</p>
     </div>
+  );
+}
+
+function ScenesView({ project, onProjectUpdate }) {
+  const [showForm, setShowForm] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+
+  const [form, setForm] = useState({
+    title: "",
+    location: "",
+    action: "",
+    camera: "",
+    duration: 5,
+    aspectRatio: "16:9",
+    characterIds: [],
+  });
+
+  function updateField(event) {
+    const { name, value } = event.target;
+
+    setForm((current) => ({
+      ...current,
+      [name]: value,
+    }));
+  }
+
+  function toggleCharacter(characterId) {
+    setForm((current) => ({
+      ...current,
+      characterIds: current.characterIds.includes(characterId)
+        ? current.characterIds.filter((id) => id !== characterId)
+        : [...current.characterIds, characterId],
+    }));
+  }
+
+  async function saveScene(event) {
+    event.preventDefault();
+
+    if (!form.title.trim()) {
+      setError("Scene title is required.");
+      return;
+    }
+
+    try {
+      setSaving(true);
+      setError("");
+
+      const response = await fetch(`${API_URL}/projects/${project.id}/scenes`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(form),
+      });
+
+      if (!response.ok) {
+        const result = await response.json();
+
+        throw new Error(result.error || "Could not save scene.");
+      }
+
+      const result = await response.json();
+
+      onProjectUpdate(result.project);
+
+      setForm({
+        title: "",
+        location: "",
+        action: "",
+        camera: "",
+        duration: 5,
+        aspectRatio: "16:9",
+        characterIds: [],
+      });
+
+      setShowForm(false);
+    } catch (err) {
+      console.error(err);
+
+      setError(err.message || "Could not save scene.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <>
+      <section className='characters-header'>
+        <div>
+          <h2>Scenes</h2>
+          <p>Build the individual shots that make up your story.</p>
+        </div>
+
+        <button
+          className='primary-button'
+          onClick={() => setShowForm(true)}
+        >
+          + Add Scene
+        </button>
+      </section>
+
+      {error && <div className='error-message'>{error}</div>}
+
+      {showForm && (
+        <form
+          className='character-form'
+          onSubmit={saveScene}
+        >
+          <div className='form-heading'>
+            <div>
+              <h3>New Scene</h3>
+
+              <p>
+                Define what happens, who appears, and how the camera sees it.
+              </p>
+            </div>
+
+            <button
+              type='button'
+              className='close-button'
+              onClick={() => setShowForm(false)}
+            >
+              ×
+            </button>
+          </div>
+
+          <div className='form-row'>
+            <label>
+              Scene Title
+              <input
+                name='title'
+                value={form.title}
+                onChange={updateField}
+                placeholder='Butterfly'
+              />
+            </label>
+
+            <label>
+              Location
+              <input
+                name='location'
+                value={form.location}
+                onChange={updateField}
+                placeholder='Deep Forest'
+              />
+            </label>
+          </div>
+
+          <label>
+            Action
+            <textarea
+              name='action'
+              value={form.action}
+              onChange={updateField}
+              rows='5'
+              placeholder='Vespie notices a butterfly and follows it through the ferns...'
+            />
+          </label>
+
+          <label>
+            Camera
+            <textarea
+              name='camera'
+              value={form.camera}
+              onChange={updateField}
+              rows='3'
+              placeholder='Low tracking shot following behind Vespie...'
+            />
+          </label>
+
+          <div className='form-row'>
+            <label>
+              Duration
+              <input
+                name='duration'
+                type='number'
+                min='1'
+                max='30'
+                value={form.duration}
+                onChange={updateField}
+              />
+            </label>
+
+            <label>
+              Aspect Ratio
+              <select
+                name='aspectRatio'
+                value={form.aspectRatio}
+                onChange={updateField}
+              >
+                <option value='16:9'>16:9 Widescreen</option>
+
+                <option value='9:16'>9:16 Vertical</option>
+
+                <option value='1:1'>1:1 Square</option>
+              </select>
+            </label>
+          </div>
+
+          <fieldset className='scene-characters'>
+            <legend>Characters</legend>
+
+            {project.characters?.length > 0 ? (
+              project.characters.map((character) => (
+                <label
+                  key={character.id}
+                  className='character-check'
+                >
+                  <input
+                    type='checkbox'
+                    checked={form.characterIds.includes(character.id)}
+                    onChange={() => toggleCharacter(character.id)}
+                  />
+
+                  <span>{character.name}</span>
+                </label>
+              ))
+            ) : (
+              <p>No characters have been added yet.</p>
+            )}
+          </fieldset>
+
+          <div className='form-actions'>
+            <button
+              type='button'
+              className='secondary-button'
+              onClick={() => setShowForm(false)}
+            >
+              Cancel
+            </button>
+
+            <button
+              type='submit'
+              className='primary-button'
+              disabled={saving}
+            >
+              {saving ? "Saving..." : "Save Scene"}
+            </button>
+          </div>
+        </form>
+      )}
+
+      {!showForm && (project.scenes?.length || 0) === 0 && (
+        <section className='empty-state character-empty'>
+          <div className='empty-icon'>🎬</div>
+
+          <h3>No scenes yet</h3>
+
+          <p>Create the first shot in your story.</p>
+        </section>
+      )}
+
+      {!showForm && project.scenes?.length > 0 && (
+        <section className='scene-grid'>
+          {project.scenes.map((scene, index) => {
+            const characters =
+              project.characters?.filter((character) =>
+                scene.characterIds?.includes(character.id),
+              ) || [];
+
+            return (
+              <article
+                className='scene-card'
+                key={scene.id}
+              >
+                <div className='scene-number'>Scene {index + 1}</div>
+
+                <h3>{scene.title}</h3>
+
+                <div className='scene-meta'>
+                  <span>{scene.duration}s</span>
+
+                  <span>{scene.aspectRatio}</span>
+
+                  {scene.location && <span>{scene.location}</span>}
+                </div>
+
+                <p className='scene-action'>
+                  {scene.action || "No action description yet."}
+                </p>
+
+                {characters.length > 0 && (
+                  <div className='scene-cast'>
+                    {characters.map((character) => (
+                      <span
+                        key={character.id}
+                        className='cast-chip'
+                      >
+                        {character.name}
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                {scene.camera && (
+                  <div className='scene-camera'>
+                    <strong>Camera:</strong> {scene.camera}
+                  </div>
+                )}
+              </article>
+            );
+          })}
+        </section>
+      )}
+    </>
   );
 }
 
