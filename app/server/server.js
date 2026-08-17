@@ -535,6 +535,8 @@ app.post("/api/projects/:projectId/scenes", async (req, res) => {
       location,
       action,
       camera,
+      audioDirection,
+      negativeInstructions,
       duration,
       aspectRatio,
       characterIds,
@@ -566,6 +568,8 @@ app.post("/api/projects/:projectId/scenes", async (req, res) => {
       location: location?.trim() || "",
       action: action?.trim() || "",
       camera: camera?.trim() || "",
+      audioDirection: audioDirection?.trim() || "",
+      negativeInstructions: negativeInstructions?.trim() || "",
       duration: Number(duration) || 5,
       aspectRatio: aspectRatio || "16:9",
       characterIds: Array.isArray(characterIds) ? characterIds : [],
@@ -625,10 +629,20 @@ app.patch("/api/projects/:projectId/scenes/:sceneId", async (req, res) => {
       location,
       action,
       camera,
+      audioDirection,
+      negativeInstructions,
       duration,
       aspectRatio,
       characterIds,
     } = req.body;
+
+    if (typeof audioDirection === "string") {
+      scene.audioDirection = audioDirection.trim();
+    }
+
+    if (typeof negativeInstructions === "string") {
+      scene.negativeInstructions = negativeInstructions.trim();
+    }
 
     if (typeof title === "string") {
       if (!title.trim()) {

@@ -911,3 +911,48 @@ button {
     grid-template-columns: 1fr;
   }
 }
+
+.scene-detail-toolbar {
+  gap: 12px;
+}
+
+.generation-brief {
+  margin-bottom: 24px;
+  padding: 24px;
+  background: #151b2b;
+  border: 1px solid #7c3aed;
+  border-radius: 14px;
+}
+
+.generation-brief-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 18px;
+}
+
+.generation-brief-header h3 {
+  margin: 0 0 6px;
+}
+
+.generation-brief-header p {
+  margin: 0;
+  color: #9ca3af;
+}
+
+.generation-brief pre {
+  max-height: 600px;
+  overflow: auto;
+  margin: 0;
+  padding: 20px;
+  background: #0b1020;
+  border: 1px solid #374151;
+  border-radius: 10px;
+  color: #e5e7eb;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 0.9rem;
+  line-height: 1.55;
+}
