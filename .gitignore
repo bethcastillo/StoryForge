@@ -1,0 +1,30 @@
+# Dependencies
+node_modules/
+
+# Environment / secrets
+.env
+.env.*
+
+# Build output
+dist/
+build/
+
+# Logs
+*.log
+
+# Local generated content
+renders/
+assets/
+projects/
+
+# AI models / large files
+models/
+*.ckpt
+*.safetensors
+*.pt
+*.pth
+
+# OS / editor clutter
+.DS_Store
+Thumbs.db
+.vscode/
