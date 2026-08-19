@@ -1503,7 +1503,6 @@ async function generateStartingFrame() {
           <pre>{generationBrief}</pre>
         </section>
       )}
-
       {editing ? (
         <form
           className='character-form scene-edit-form'
