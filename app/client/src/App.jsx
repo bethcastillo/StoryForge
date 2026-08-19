@@ -926,6 +926,8 @@ function ScenesView({ project, onProjectUpdate }) {
     location: "",
     action: "",
     camera: "",
+    audioDirection: "",
+    negativeInstructions: "",
     duration: 5,
     aspectRatio: "16:9",
     characterIds: [],
@@ -984,6 +986,8 @@ function ScenesView({ project, onProjectUpdate }) {
         location: "",
         action: "",
         camera: "",
+        audioDirection: "",
+        negativeInstructions: "",
         duration: 5,
         aspectRatio: "16:9",
         characterIds: [],
@@ -1096,6 +1100,28 @@ function ScenesView({ project, onProjectUpdate }) {
               onChange={updateField}
               rows='3'
               placeholder='Low tracking shot following behind Vespie...'
+            />
+          </label>
+
+          <label>
+            Audio Direction
+            <textarea
+              name='audioDirection'
+              value={form.audioDirection}
+              onChange={updateField}
+              rows='4'
+              placeholder='No dialogue. No music. Vespie chirps and trills. Forest ambience and birds overhead.'
+            />
+          </label>
+
+          <label>
+            Negative Instructions
+            <textarea
+              name='negativeInstructions'
+              value={form.negativeInstructions}
+              onChange={updateField}
+              rows='4'
+              placeholder='No text. No humans. Do not change Vespie’s colors or anatomy.'
             />
           </label>
 
@@ -1249,10 +1275,18 @@ function SceneDetail({ project, scene, onBack, onProjectUpdate }) {
     location: scene.location || "",
     action: scene.action || "",
     camera: scene.camera || "",
+    audioDirection: scene.audioDirection || "",
+    negativeInstructions: scene.negativeInstructions || "",
     duration: scene.duration || 5,
     aspectRatio: scene.aspectRatio || "16:9",
     characterIds: scene.characterIds || [],
   });
+
+  const [showBrief, setShowBrief] = useState(false);
+
+  const [copyStatus, setCopyStatus] = useState("");
+
+  const [generating, setGenerating] = useState(false);
 
   function updateField(event) {
     const { name, value } = event.target;
@@ -1356,6 +1390,55 @@ function SceneDetail({ project, scene, onBack, onProjectUpdate }) {
     }
   }
 
+  async function copyGenerationBrief() {
+    try {
+      await navigator.clipboard.writeText(generationBrief);
+
+      setCopyStatus("Copied!");
+
+      setTimeout(() => {
+        setCopyStatus("");
+      }, 1500);
+    } catch (error) {
+      console.error("Could not copy generation brief:", error);
+
+      setCopyStatus("Copy failed");
+    }
+  }
+
+async function generateStartingFrame() {
+  try {
+    setGenerating(true);
+    setError("");
+
+    const response = await fetch(
+      `${API_URL}/projects/${project.id}` +
+        `/scenes/${scene.id}` +
+        `/generate-starting-frame`,
+      {
+        method: "POST",
+      },
+    );
+
+    if (!response.ok) {
+      const result = await response.json();
+
+      throw new Error(result.error || "Could not generate starting frame.");
+    }
+
+    const result = await response.json();
+
+    onProjectUpdate(result.project);
+  } catch (err) {
+    console.error(err);
+
+    setError(err.message || "Could not generate starting frame.");
+  } finally {
+    setGenerating(false);
+  }
+}
+  const generationBrief = buildGenerationBrief(project, scene);
+
   const cast =
     project.characters?.filter((character) =>
       scene.characterIds?.includes(character.id),
@@ -1383,11 +1466,43 @@ function SceneDetail({ project, scene, onBack, onProjectUpdate }) {
       <div className='scene-detail-toolbar'>
         <button
           className='secondary-button'
+          onClick={() => setShowBrief(!showBrief)}
+        >
+          {showBrief ? "Hide Generation Brief" : "Generation Brief"}
+        </button>
+
+        <button
+          className='secondary-button'
           onClick={() => setEditing(!editing)}
         >
           {editing ? "Cancel Edit" : "Edit Scene"}
         </button>
       </div>
+
+      {showBrief && (
+        <section className='generation-brief'>
+          <div className='generation-brief-header'>
+            <div>
+              <h3>Generation Brief</h3>
+
+              <p>
+                Model-ready instructions assembled from this scene and its
+                characters.
+              </p>
+            </div>
+
+            <button
+              type='button'
+              className='primary-button'
+              onClick={copyGenerationBrief}
+            >
+              {copyStatus || "Copy Brief"}
+            </button>
+          </div>
+
+          <pre>{generationBrief}</pre>
+        </section>
+      )}
 
       {editing ? (
         <form
@@ -1430,6 +1545,26 @@ function SceneDetail({ project, scene, onBack, onProjectUpdate }) {
               name='camera'
               rows='3'
               value={form.camera}
+              onChange={updateField}
+            />
+          </label>
+
+          <label>
+            Audio Direction
+            <textarea
+              name='audioDirection'
+              rows='4'
+              value={form.audioDirection}
+              onChange={updateField}
+            />
+          </label>
+
+          <label>
+            Negative Instructions
+            <textarea
+              name='negativeInstructions'
+              rows='4'
+              value={form.negativeInstructions}
               onChange={updateField}
             />
           </label>
@@ -1508,6 +1643,16 @@ function SceneDetail({ project, scene, onBack, onProjectUpdate }) {
             />
 
             <SceneField
+              title='Audio Direction'
+              value={scene.audioDirection}
+            />
+
+            <SceneField
+              title='Negative Instructions'
+              value={scene.negativeInstructions}
+            />
+
+            <SceneField
               title='Duration'
               value={`${scene.duration} seconds`}
             />
@@ -1563,22 +1708,32 @@ function SceneDetail({ project, scene, onBack, onProjectUpdate }) {
                 <p>The visual frame this scene should begin from.</p>
               </div>
 
-              <label className='upload-button'>
-                {uploading
-                  ? "Uploading..."
-                  : scene.startingFrame
-                    ? "Replace Frame"
-                    : "+ Add Frame"}
+              <div className='starting-frame-actions'>
+                <button
+                  type='button'
+                  className='primary-button'
+                  onClick={generateStartingFrame}
+                  disabled={generating}
+                >
+                  {generating ? "Generating..." : "Generate Starting Frame"}
+                </button>
 
-                <input
-                  type='file'
-                  accept='image/png,image/jpeg,image/webp'
-                  onChange={uploadStartingFrame}
-                  disabled={uploading}
-                />
-              </label>
+                <label className='upload-button'>
+                  {uploading
+                    ? "Uploading..."
+                    : scene.startingFrame
+                      ? "Upload Replacement"
+                      : "Upload Frame"}
+
+                  <input
+                    type='file'
+                    accept='image/png,image/jpeg,image/webp'
+                    onChange={uploadStartingFrame}
+                    disabled={uploading}
+                  />
+                </label>
+              </div>
             </div>
-
             {scene.startingFrame ? (
               <div className='starting-frame-preview'>
                 <img
@@ -1615,6 +1770,96 @@ function SceneField({ title, value }) {
       <p>{value || "Not defined yet."}</p>
     </div>
   );
+}
+
+function buildGenerationBrief(project, scene) {
+  const characters =
+    project.characters?.filter((character) =>
+      scene.characterIds?.includes(character.id),
+    ) || [];
+
+  const sections = [];
+
+  sections.push(
+    [
+      "SCENE",
+      `Title: ${scene.title || "Untitled"}`,
+      `Location: ${scene.location || "Not specified"}`,
+      `Duration: ${scene.duration || 5} seconds`,
+      `Aspect Ratio: ${scene.aspectRatio || "16:9"}`,
+    ].join("\n"),
+  );
+
+  if (scene.action) {
+    sections.push(["ACTION", scene.action].join("\n"));
+  }
+
+  if (scene.camera) {
+    sections.push(["CAMERA", scene.camera].join("\n"));
+  }
+
+  if (scene.audioDirection) {
+    sections.push(["AUDIO DIRECTION", scene.audioDirection].join("\n"));
+  }
+
+  if (characters.length > 0) {
+    const characterText = characters
+      .map((character) => {
+        const primary =
+          character.referenceImages?.find((image) => image.isPrimary) ||
+          character.referenceImages?.[0];
+
+        const references =
+          character.referenceImages
+            ?.map((image) => {
+              const label = image.label || "Unlabeled";
+
+              const note = image.note ? `: ${image.note}` : "";
+
+              return `- ${label}${note}`;
+            })
+            .join("\n") || "- No reference images";
+
+        return [
+          character.name.toUpperCase(),
+          `Type: ${character.species || "Not specified"}`,
+          "",
+          "Visual Identity:",
+          character.visualDescription || "Not defined",
+          "",
+          "Movement:",
+          character.movement || "Not defined",
+          "",
+          "Continuity Rules:",
+          character.continuityRules || "Not defined",
+          "",
+          "Reference Guidance:",
+          references,
+          "",
+          `Primary Reference: ${primary ? primary.originalName : "None"}`,
+        ].join("\n");
+      })
+      .join("\n\n");
+
+    sections.push(["CHARACTERS", characterText].join("\n\n"));
+  }
+
+  if (scene.negativeInstructions) {
+    sections.push(
+      ["NEGATIVE INSTRUCTIONS", scene.negativeInstructions].join("\n"),
+    );
+  }
+
+  sections.push(
+    [
+      "STARTING FRAME",
+      scene.startingFrame
+        ? `Present: ${scene.startingFrame.originalName}`
+        : "No starting frame supplied.",
+    ].join("\n"),
+  );
+
+  return sections.join("\n\n");
 }
 
 export default App;

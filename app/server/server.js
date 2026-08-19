@@ -108,6 +108,13 @@ const sceneImageUpload = multer({
   },
 });
 
+const COMFYUI_URL = "http://127.0.0.1:8188";
+
+const STARTING_FRAME_WORKFLOW = path.resolve(
+  __dirname,
+  "../../workflows/starting-frame.json",
+);
+
 // Make sure the projects directory exists.
 async function ensureProjectsDirectory() {
   await fs.mkdir(PROJECTS_DIR, { recursive: true });
@@ -137,6 +144,77 @@ async function getProjects() {
 
 async function ensureAssetsDirectory() {
   await fs.mkdir(ASSETS_DIR, { recursive: true });
+}
+
+async function loadStartingFrameWorkflow() {
+  const contents = await fs.readFile(STARTING_FRAME_WORKFLOW, "utf8");
+
+  return JSON.parse(contents);
+}
+
+function wait(milliseconds) {
+  return new Promise((resolve) => setTimeout(resolve, milliseconds));
+}
+
+async function getComfyHistory(promptId) {
+  const response = await fetch(`${COMFYUI_URL}/history/${promptId}`);
+
+  if (!response.ok) {
+    throw new Error(`Could not read ComfyUI history: ${response.status}`);
+  }
+
+  return response.json();
+}
+
+async function waitForComfyResult(promptId, timeoutMs = 120000) {
+  const startedAt = Date.now();
+
+  while (Date.now() - startedAt < timeoutMs) {
+    const history = await getComfyHistory(promptId);
+
+    const entry = history[promptId];
+
+    if (entry?.outputs) {
+      return entry;
+    }
+
+    await wait(1000);
+  }
+
+  throw new Error("Timed out waiting for ComfyUI generation.");
+}
+
+function buildScenePrompt(project, scene) {
+  const characters =
+    project.characters?.filter((character) =>
+      scene.characterIds?.includes(character.id),
+    ) || [];
+
+  const characterText = characters
+    .map((character) =>
+      [
+        character.name,
+        character.species,
+        character.visualDescription,
+        character.movement,
+        character.continuityRules,
+      ]
+        .filter(Boolean)
+        .join(". "),
+    )
+    .join("\n\n");
+
+  return [
+    scene.location,
+    scene.action,
+    scene.camera,
+    characterText,
+    "cinematic fantasy scene",
+    "detailed environment",
+    "consistent character appearance",
+  ]
+    .filter(Boolean)
+    .join(". ");
 }
 
 // Server status
@@ -535,6 +613,8 @@ app.post("/api/projects/:projectId/scenes", async (req, res) => {
       location,
       action,
       camera,
+      audioDirection,
+      negativeInstructions,
       duration,
       aspectRatio,
       characterIds,
@@ -566,6 +646,8 @@ app.post("/api/projects/:projectId/scenes", async (req, res) => {
       location: location?.trim() || "",
       action: action?.trim() || "",
       camera: camera?.trim() || "",
+      audioDirection: audioDirection?.trim() || "",
+      negativeInstructions: negativeInstructions?.trim() || "",
       duration: Number(duration) || 5,
       aspectRatio: aspectRatio || "16:9",
       characterIds: Array.isArray(characterIds) ? characterIds : [],
@@ -625,10 +707,20 @@ app.patch("/api/projects/:projectId/scenes/:sceneId", async (req, res) => {
       location,
       action,
       camera,
+      audioDirection,
+      negativeInstructions,
       duration,
       aspectRatio,
       characterIds,
     } = req.body;
+
+    if (typeof audioDirection === "string") {
+      scene.audioDirection = audioDirection.trim();
+    }
+
+    if (typeof negativeInstructions === "string") {
+      scene.negativeInstructions = negativeInstructions.trim();
+    }
 
     if (typeof title === "string") {
       if (!title.trim()) {
@@ -681,6 +773,174 @@ app.patch("/api/projects/:projectId/scenes/:sceneId", async (req, res) => {
     });
   }
 });
+
+app.post(
+  "/api/projects/:projectId/scenes/:sceneId/generate-starting-frame",
+  async (req, res) => {
+    try {
+      const { projectId, sceneId } = req.params;
+
+      const projectPath = path.join(PROJECTS_DIR, `${projectId}.json`);
+
+      const contents = await fs.readFile(projectPath, "utf8");
+
+      const project = JSON.parse(contents);
+
+      const scene = project.scenes?.find((item) => item.id === sceneId);
+
+      if (!scene) {
+        return res.status(404).json({
+          error: "Scene not found.",
+        });
+      }
+
+      const workflow = await loadStartingFrameWorkflow();
+
+      const positivePrompt = buildScenePrompt(project, scene);
+
+      const negativePrompt =
+        scene.negativeInstructions ||
+        "text, watermark, malformed anatomy, blurry";
+
+      // Node 6 = positive CLIP prompt
+      workflow["6"].inputs.text = positivePrompt;
+
+      // Node 7 = negative CLIP prompt
+      workflow["7"].inputs.text = negativePrompt;
+
+      // Node 5 = image dimensions
+      const aspectRatio = scene.aspectRatio || "16:9";
+
+      // if (aspectRatio === "16:9") {
+      //   workflow["5"].inputs.width = 768;
+      //   workflow["5"].inputs.height = 432;
+      // } else if (aspectRatio === "9:16") {
+      //   workflow["5"].inputs.width = 432;
+      //   workflow["5"].inputs.height = 768;
+      // } else {
+      //   workflow["5"].inputs.width = 512;
+      //   workflow["5"].inputs.height = 512;
+      // }
+      workflow["5"].inputs.width = 512;
+      workflow["5"].inputs.height = 512;
+      // Make output filename easier to recognize.
+      workflow["27"].inputs.filename_prefix = `StoryForge_${sceneId}`;
+
+      const comfyResponse = await fetch(`${COMFYUI_URL}/prompt`, {
+        method: "POST",
+
+        headers: {
+          "Content-Type": "application/json",
+        },
+
+        body: JSON.stringify({
+          prompt: workflow,
+        }),
+      });
+
+      if (!comfyResponse.ok) {
+        const text = await comfyResponse.text();
+
+        throw new Error(`ComfyUI rejected workflow: ${text}`);
+      }
+
+      const comfyResult = await comfyResponse.json();
+
+      const promptId = comfyResult.prompt_id;
+
+      const historyEntry = await waitForComfyResult(promptId);
+
+      const outputNode = historyEntry.outputs?.["27"];
+
+      const generatedImage = outputNode?.images?.[0];
+
+      if (!generatedImage) {
+        throw new Error("ComfyUI completed but returned no image.");
+      }
+
+      const imageQuery = new URLSearchParams({
+        filename: generatedImage.filename,
+        subfolder: generatedImage.subfolder || "",
+        type: generatedImage.type || "output",
+      });
+
+      const imageResponse = await fetch(
+        `${COMFYUI_URL}/view?${imageQuery.toString()}`,
+      );
+
+      if (!imageResponse.ok) {
+        throw new Error("Could not retrieve generated image from ComfyUI.");
+      }
+
+      const imageBuffer = Buffer.from(await imageResponse.arrayBuffer());
+
+      const sceneDirectory = path.join(
+        ASSETS_DIR,
+        "projects",
+        projectId,
+        "scenes",
+        sceneId,
+      );
+
+      await fs.mkdir(sceneDirectory, { recursive: true });
+
+      const localFilename = `generated-${crypto.randomUUID()}.png`;
+
+      const localPath = path.join(sceneDirectory, localFilename);
+
+      await fs.writeFile(localPath, imageBuffer);
+
+      // Remove previous StoryForge starting frame if desired.
+      if (scene.startingFrame?.filename) {
+        const oldPath = path.join(sceneDirectory, scene.startingFrame.filename);
+
+        try {
+          await fs.unlink(oldPath);
+        } catch (error) {
+          if (error.code !== "ENOENT") {
+            console.warn("Could not remove old starting frame:", error);
+          }
+        }
+      }
+
+      scene.startingFrame = {
+        id: crypto.randomUUID(),
+        filename: localFilename,
+        originalName: generatedImage.filename,
+        mimeType: "image/png",
+
+        url:
+          `/assets/projects/${projectId}` +
+          `/scenes/${sceneId}` +
+          `/${localFilename}`,
+
+        source: "comfyui",
+        promptId,
+        positivePrompt,
+        negativePrompt,
+
+        createdAt: new Date().toISOString(),
+      };
+
+      scene.updatedAt = new Date().toISOString();
+
+      project.updatedAt = new Date().toISOString();
+
+      await fs.writeFile(projectPath, JSON.stringify(project, null, 2), "utf8");
+
+      res.json({
+        scene,
+        project,
+      });
+    } catch (error) {
+      console.error("Could not generate starting frame:", error);
+
+      res.status(500).json({
+        error: error.message || "Could not generate starting frame.",
+      });
+    }
+  },
+);
 
 app.post(
   "/api/projects/:projectId/scenes/:sceneId/starting-frame",
