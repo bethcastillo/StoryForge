@@ -356,35 +356,56 @@ Phase 0 establishes:
 
 **Status:** In Progress
 
-Create and approve this central development reference.
+Create and maintain the central development reference for BixciBox.
+
+**Primary document:** `docs/BIXCIBOX_PROJECT_COMPASS.md`
+
+---
 
 ### 0.2 Product Scope & Boundaries
 
-**Status:** Next
+**Status:** Done
 
-Define:
+Defined:
 
-- Version 1
-- Minimum useful product
-- Features required for Version 1
-- Features deliberately postponed
-- Non-goals
+- Version 1 scope
+- Minimum useful workflow
+- Required Version 1 capabilities
+- Explicitly deferred features
+- Version 1 non-goals
+- Version 1 definition of done
+
+**Primary document:** `docs/product/scope.md`
+
+**Key outcome:** Version 1 is focused on project organization, character consistency support, scene planning, ComfyUI still-image generation, take management, and reliable project persistence.
+
+---
 
 ### 0.3 Architecture Overview
 
-**Status:** Not Started
+**Status:** Done
 
-Define the major components of the application and their responsibilities.
+Defined the major components of the application and their responsibilities.
+
+**Primary document:** `docs/architecture/overview.md`
+
+**Key outcome:** BixciBox owns project state and creative metadata, while specialized systems such as ComfyUI operate through a provider layer rather than being treated as the application backend.
+
+---
 
 ### 0.4 Project & Data Model
 
-**Status:** Not Started
+**Status:** Done
 
-Define the major entities and relationships used by a BixciBox Project.
+Define the major entities, ownership rules, and relationships used by a BixciBox Project.
+
+**Primary document:** `docs/architecture/data-model.md`
+
+**Key outcome:** A clear definition of the core BixciBox entities, what data each one owns, and how they relate to one another, without yet locking us into a specific database or storage technology.
 
 ### 0.5 Development Roadmap
 
-**Status:** Not Started
+**Status:** Next
 
 Break development into ordered phases with clear goals and completion criteria.
 
