@@ -405,7 +405,7 @@ Define the major entities, ownership rules, and relationships used by a BixciBox
 
 ### 0.5 Development Roadmap
 
-**Status:** Next
+**Status:** Done
 
 Break development into ordered phases with clear goals and completion criteria.
 
@@ -415,7 +415,7 @@ Break development into ordered phases with clear goals and completion criteria.
 
 ### 0.6 Development Standards
 
-**Status:** Not Started
+**Status:** Done
 
 Define:
 
@@ -425,6 +425,10 @@ Define:
 - Testing expectations
 - Documentation requirements
 - Development workflow
+
+**Primary document:** docs/development/standards.md
+
+**Key outcome:** Established consistent rules for code organization, testing, persistence safety, provider isolation, documentation, Git usage, dependency management, and completion criteria for development work.
 
 ### 0.7 Initial Backlog
 
