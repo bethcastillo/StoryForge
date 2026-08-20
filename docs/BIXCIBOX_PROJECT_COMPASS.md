@@ -432,7 +432,7 @@ Define:
 
 ### 0.7 Initial Backlog
 
-**Status:** Not Started
+**Status:** Done
 
 Capture known feature ideas and categorize them as:
 
@@ -442,6 +442,10 @@ Capture known feature ideas and categorize them as:
 - **Maybe**
 
 Ideas in the backlog do not automatically become requirements.
+
+**Primary document:** docs/product/feature-backlog.md
+
+**Key outcome:** Established a structured backlog that separates current work from near-term, deferred, and speculative features, preserving future ideas without allowing them to disrupt the active roadmap.
 
 ---
 
