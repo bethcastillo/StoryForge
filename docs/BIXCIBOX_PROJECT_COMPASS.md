@@ -409,6 +409,10 @@ Define the major entities, ownership rules, and relationships used by a BixciBox
 
 Break development into ordered phases with clear goals and completion criteria.
 
+**Primary document:** `docs/architecture/roadmap.md`
+
+**Key outcome:** Defined an ordered development path from Phase 0 through BixciBox Version 1, with each phase focused on a specific user outcome and governed by explicit completion criteria.
+
 ### 0.6 Development Standards
 
 **Status:** Not Started

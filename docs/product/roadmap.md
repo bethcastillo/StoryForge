@@ -604,24 +604,3 @@ A roadmap change should document:
 - Whether an ADR or Compass update is required
 
 Moving a feature from a later phase into Version 1 should require a clear reason.
-
----
-
-# 17. Phase 0.5 Completion Criteria
-
-Phase 0.5 is complete when:
-
-- Version 1 development phases are defined
-- Each phase has a clear goal
-- Each phase has a primary user outcome
-- Each phase has a definition of done
-- Major phase dependencies are documented
-- Post-Version-1 directions are identified
-- The roadmap change policy is documented
-- The Project Compass is updated with the roadmap outcome
-
----
-
-# 18. Key Outcome
-
-> **Defined an ordered development path from Phase 0 through BixciBox Version 1, with each phase focused on a specific user outcome and governed by explicit completion criteria.**
