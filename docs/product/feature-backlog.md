@@ -1,6 +1,6 @@
 # BixciBox Initial Feature Backlog
 
-**Document Status:** Draft
+**Document Status:** Active
 **Phase:** 0.7 - Initial Backlog
 **Parent Document:** `docs/BIXCIBOX_PROJECT_COMPASS.md`
 

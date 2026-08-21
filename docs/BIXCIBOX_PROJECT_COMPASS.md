@@ -409,7 +409,7 @@ Define the major entities, ownership rules, and relationships used by a BixciBox
 
 Break development into ordered phases with clear goals and completion criteria.
 
-**Primary document:** `docs/architecture/roadmap.md`
+**Primary document:** `docs/product/roadmap.md`
 
 **Key outcome:** Defined an ordered development path from Phase 0 through BixciBox Version 1, with each phase focused on a specific user outcome and governed by explicit completion criteria.
 
@@ -463,7 +463,7 @@ However, experimental work must not quietly become production architecture witho
 
 # 12. Version 1 Scope
 
-**Status: To Be Defined During Phase 0.2**
+**Status: Done**
 
 Version 1 should represent the first BixciBox release that provides a genuinely useful creative workflow.
 
@@ -475,7 +475,7 @@ A feature should not be included in Version 1 merely because BixciBox may eventu
 
 # 13. Explicitly Deferred Features
 
-**Status: To Be Defined During Phase 0.2**
+**Status: Done**
 
 This section will contain important capabilities that are intentionally postponed.
 
@@ -485,7 +485,7 @@ Keeping them here allows us to preserve good ideas without allowing them to expa
 
 # 14. High-Level Architecture
 
-**Status: To Be Defined During Phase 0.3**
+**Status: Done**
 
 The architecture should define responsibilities before implementation details.
 

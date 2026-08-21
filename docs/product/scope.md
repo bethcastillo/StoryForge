@@ -1,6 +1,6 @@
 # BixciBox Product Scope & Boundaries
 
-**Document Status:** Draft
+**Document Status:** Active
 **Phase:** 0.2 - Product Scope & Boundaries
 **Applies To:** BixciBox Version 1
 **Parent Document:** `docs/BIXCIBOX_PROJECT_COMPASS.md`
@@ -13,12 +13,12 @@ This document defines the scope of **BixciBox Version 1**.
 
 Its purpose is to establish:
 
-* What Version 1 must accomplish
-* What features are required
-* What features are useful but not required
-* What features are deliberately postponed
-* What BixciBox Version 1 is not intended to be
-* What conditions must be met before Version 1 can be considered useful and complete
+- What Version 1 must accomplish
+- What features are required
+- What features are useful but not required
+- What features are deliberately postponed
+- What BixciBox Version 1 is not intended to be
+- What conditions must be met before Version 1 can be considered useful and complete
 
 This document acts as a boundary against uncontrolled feature growth.
 
@@ -93,14 +93,14 @@ The following capabilities are required for Version 1.
 
 The creator must be able to:
 
-* Create a new BixciBox Project
-* Give the project a title
-* Save the project
-* Close the project
-* Reopen an existing project
-* Preserve project state between sessions
-* Identify the project's asset storage location
-* Keep project assets associated with the correct project
+- Create a new BixciBox Project
+- Give the project a title
+- Save the project
+- Close the project
+- Reopen an existing project
+- Preserve project state between sessions
+- Identify the project's asset storage location
+- Keep project assets associated with the correct project
 
 The project format must be sufficiently structured to support future expansion without requiring Version 1 to implement those future features.
 
@@ -112,25 +112,25 @@ The creator must be able to define reusable characters.
 
 A character record should support, at minimum:
 
-* Character name
-* Character description
-* Physical appearance notes
-* Important consistency rules
-* Reference images
-* Generation prompt information
-* Negative prompt information where appropriate
-* Notes relevant to generation
+- Character name
+- Character description
+- Physical appearance notes
+- Important consistency rules
+- Reference images
+- Generation prompt information
+- Negative prompt information where appropriate
+- Notes relevant to generation
 
 Examples of consistency rules might include:
 
-* Eye color
-* Hair color
-* Clothing
-* Species
-* Body shape
-* Anatomy
-* Distinguishing marks
-* Required or prohibited physical features
+- Eye color
+- Hair color
+- Clothing
+- Species
+- Body shape
+- Anatomy
+- Distinguishing marks
+- Required or prohibited physical features
 
 Character information should be reusable across multiple scenes.
 
@@ -144,15 +144,15 @@ The creator must be able to create and manage scenes.
 
 A scene should support, at minimum:
 
-* Scene number or order
-* Scene title or short identifier
-* Scene description
-* Characters appearing in the scene
-* Visual action
-* Generation notes
-* Associated prompts
-* Associated generated assets
-* Scene status
+- Scene number or order
+- Scene title or short identifier
+- Scene description
+- Characters appearing in the scene
+- Visual action
+- Generation notes
+- Associated prompts
+- Associated generated assets
+- Scene status
 
 Scenes must be reorderable.
 
@@ -168,13 +168,13 @@ Prompt information should be associated with the scene, asset, or generation att
 
 Where practical, BixciBox should preserve:
 
-* Positive prompt
-* Negative prompt
-* Character-related prompt information
-* Relevant generation settings
-* Workflow or workflow identifier
-* Generation date/time
-* Provider used
+- Positive prompt
+- Negative prompt
+- Character-related prompt information
+- Relevant generation settings
+- Workflow or workflow identifier
+- Generation date/time
+- Provider used
 
 Prompt revisions should not silently destroy useful generation history.
 
@@ -186,12 +186,12 @@ ComfyUI will be the primary image-generation provider for Version 1.
 
 BixciBox must be able to communicate with a locally running ComfyUI installation sufficiently to:
 
-* Submit an image-generation request
-* Provide the workflow and necessary generation inputs
-* Detect completion or failure
-* Receive or locate the generated output
-* Import the output into the BixciBox Project
-* Associate the output with the request that created it
+- Submit an image-generation request
+- Provide the workflow and necessary generation inputs
+- Detect completion or failure
+- Receive or locate the generated output
+- Import the output into the BixciBox Project
+- Associate the output with the request that created it
 
 BixciBox should treat ComfyUI as a **provider**, not as the BixciBox application backend.
 
@@ -207,9 +207,9 @@ BixciBox must therefore treat generated images as **takes**, not merely files.
 
 The creator must be able to distinguish between:
 
-* Unreviewed takes
-* Approved takes
-* Rejected takes
+- Unreviewed takes
+- Approved takes
+- Rejected takes
 
 A rejected take should not automatically be deleted.
 
@@ -217,14 +217,14 @@ The creator should be able to generate another take without overwriting earlier 
 
 Where practical, a take should retain information about:
 
-* The scene it belongs to
-* The prompt used
-* The character definitions involved
-* The provider used
-* Relevant generation settings
-* The source workflow
-* Generation time
-* Approval status
+- The scene it belongs to
+- The prompt used
+- The character definitions involved
+- The provider used
+- Relevant generation settings
+- The source workflow
+- Generation time
+- Approval status
 
 ---
 
@@ -234,11 +234,11 @@ BixciBox must maintain a meaningful relationship between project metadata and ph
 
 Version 1 asset handling should support:
 
-* Character reference images
-* Generated images
-* Other image references needed for generation
-* Approved scene images
-* Rejected or experimental generated images
+- Character reference images
+- Generated images
+- Other image references needed for generation
+- Approved scene images
+- Rejected or experimental generated images
 
 Assets should not depend on meaningless filenames alone for identification.
 
@@ -256,12 +256,12 @@ It means BixciBox must preserve and reuse the information needed to pursue consi
 
 At minimum, this includes:
 
-* Character reference images
-* Character descriptions
-* Character prompt information
-* Character-specific generation rules
-* Important anatomy or appearance constraints
-* Reusable ComfyUI-related settings where appropriate
+- Character reference images
+- Character descriptions
+- Character prompt information
+- Character-specific generation rules
+- Important anatomy or appearance constraints
+- Reusable ComfyUI-related settings where appropriate
 
 BixciBox should reduce repeated manual setup.
 
@@ -297,15 +297,15 @@ The creator must be able to close BixciBox, reopen the project later, and recove
 
 At minimum, the following relationships must survive:
 
-* Characters
-* Character references
-* Scenes
-* Scene order
-* Prompts
-* Generated assets
-* Approved/rejected status
-* Relevant generation metadata
-* Project settings
+- Characters
+- Character references
+- Scenes
+- Scene order
+- Prompts
+- Generated assets
+- Approved/rejected status
+- Relevant generation metadata
+- Project settings
 
 A system that generates images successfully but loses or corrupts project organization is not considered a successful Version 1.
 
@@ -319,20 +319,20 @@ They are not required for Version 1 completion.
 
 Possible optional features include:
 
-* Reusable location definitions
-* Reusable prop definitions
-* Scene thumbnails
-* Simple search or filtering
-* Asset tags
-* Favorites
-* Generation notes
-* Duplicate project
-* Basic project templates
-* Prompt templates
-* Simple generation history browsing
-* Manual asset import
-* Manual asset export
-* Lightweight continuity notes
+- Reusable location definitions
+- Reusable prop definitions
+- Scene thumbnails
+- Simple search or filtering
+- Asset tags
+- Favorites
+- Generation notes
+- Duplicate project
+- Basic project templates
+- Prompt templates
+- Simple generation history browsing
+- Manual asset import
+- Manual asset export
+- Lightweight continuity notes
 
 Optional features must not destabilize required Version 1 capabilities.
 
@@ -348,12 +348,12 @@ The following capabilities are intentionally deferred beyond Version 1 unless a 
 
 Version 1 will not require:
 
-* Text-to-video generation
-* Image-to-video generation
-* Multiple video providers
-* Video-generation job management
-* Automated clip extension
-* Frame interpolation
+- Text-to-video generation
+- Image-to-video generation
+- Multiple video providers
+- Video-generation job management
+- Automated clip extension
+- Frame interpolation
 
 The architecture should avoid blocking these capabilities later.
 
@@ -365,15 +365,15 @@ Version 1 will not attempt to replace a dedicated nonlinear video editor.
 
 Deferred capabilities include:
 
-* Frame-accurate editing
-* Multiple video tracks
-* Transitions
-* Keyframes
-* Compositing
-* Color grading
-* Advanced trimming
-* Effects
-* Proxy workflows
+- Frame-accurate editing
+- Multiple video tracks
+- Transitions
+- Keyframes
+- Compositing
+- Color grading
+- Advanced trimming
+- Effects
+- Proxy workflows
 
 A basic scene/storyboard order is sufficient for Version 1.
 
@@ -383,14 +383,14 @@ A basic scene/storyboard order is sufficient for Version 1.
 
 Version 1 will not require:
 
-* Music synchronization
-* Suno integration
-* Voice generation
-* Dialogue recording
-* Automatic narration
-* Sound-effect libraries
-* Audio mixing
-* Multitrack audio editing
+- Music synchronization
+- Suno integration
+- Voice generation
+- Dialogue recording
+- Automatic narration
+- Sound-effect libraries
+- Audio mixing
+- Multitrack audio editing
 
 These remain important future capabilities.
 
@@ -412,14 +412,14 @@ Version 1 is designed for one creator.
 
 Deferred capabilities include:
 
-* User accounts
-* Shared projects
-* Simultaneous editing
-* Permissions
-* Roles
-* Comments
-* Team review
-* Cloud collaboration
+- User accounts
+- Shared projects
+- Simultaneous editing
+- Permissions
+- Roles
+- Comments
+- Team review
+- Cloud collaboration
 
 ---
 
@@ -427,10 +427,10 @@ Deferred capabilities include:
 
 Version 1 does not require:
 
-* Automatic cloud backup
-* Cross-device synchronization
-* Hosted project storage
-* Cloud asset management
+- Automatic cloud backup
+- Cross-device synchronization
+- Hosted project storage
+- Cloud asset management
 
 BixciBox should remain local-first.
 
@@ -468,11 +468,11 @@ Version 1 does not require AI to automatically detect continuity errors.
 
 For example, Version 1 is not required to recognize that a generated character has:
 
-* The wrong eye color
-* Incorrect anatomy
-* Missing clothing
-* Extra limbs
-* A different hairstyle
+- The wrong eye color
+- Incorrect anatomy
+- Missing clothing
+- Extra limbs
+- A different hairstyle
 
 BixciBox should store the rules needed for such analysis later, but automated visual verification is deferred.
 
@@ -482,15 +482,15 @@ BixciBox should store the rules needed for such analysis later, but automated vi
 
 BixciBox Version 1 is **not** intended to be:
 
-* A replacement for ComfyUI
-* A replacement for a professional video editor
-* A complete digital audio workstation
-* A collaborative studio-management platform
-* A cloud-first SaaS product
-* A general-purpose AI image generator
-* A universal interface for every AI model
-* A complete screenplay-writing application
-* A finished solution for every stage of filmmaking
+- A replacement for ComfyUI
+- A replacement for a professional video editor
+- A complete digital audio workstation
+- A collaborative studio-management platform
+- A cloud-first SaaS product
+- A general-purpose AI image generator
+- A universal interface for every AI model
+- A complete screenplay-writing application
+- A finished solution for every stage of filmmaking
 
 Version 1 exists to solve a narrower problem well.
 
@@ -502,15 +502,15 @@ The creator should primarily interact with **creative concepts**, not raw infras
 
 Where practical, the BixciBox interface should speak in terms such as:
 
-* Project
-* Character
-* Scene
-* Prompt
-* Reference
-* Take
-* Approved
-* Rejected
-* Generate
+- Project
+- Character
+- Scene
+- Prompt
+- Reference
+- Take
+- Approved
+- Rejected
+- Generate
 
 Technical details such as workflow JSON, node identifiers, provider communication, file paths, and job IDs may need to exist internally but should not dominate the normal creative workflow.
 
@@ -557,10 +557,10 @@ A new idea does not automatically become an active feature.
 
 It should first be categorized as:
 
-* Now
-* Next
-* Later
-* Maybe
+- Now
+- Next
+- Later
+- Maybe
 
 ---
 
@@ -586,11 +586,11 @@ It is not necessary to build video generation now.
 
 A feature should be reconsidered if implementing it requires BixciBox to quietly become:
 
-* A video editor
-* An audio workstation
-* A cloud platform
-* A ComfyUI replacement
-* A collaboration suite
+- A video editor
+- An audio workstation
+- A cloud platform
+- A ComfyUI replacement
+- A collaboration suite
 
 These may become future capabilities, but they should emerge through deliberate development phases.
 
@@ -620,15 +620,15 @@ Generation features may become unavailable when the provider is offline, but the
 
 The following questions may be resolved during later Phase 0 work without changing the fundamental Version 1 goal:
 
-* Are locations required for Version 1 or optional?
-* Should manual image import be required?
-* How much ComfyUI workflow editing should occur inside BixciBox?
-* Should users select existing workflows, use BixciBox-provided workflows, or both?
-* How much generation metadata should be visible in the normal interface?
-* Should rejected takes remain indefinitely or support configurable cleanup?
-* Is a storyboard view required, or is an ordered scene list sufficient initially?
-* Should project duplication be part of Version 1?
-* Should BixciBox create portable project folders that can be moved between computers?
+- Are locations required for Version 1 or optional?
+- Should manual image import be required?
+- How much ComfyUI workflow editing should occur inside BixciBox?
+- Should users select existing workflows, use BixciBox-provided workflows, or both?
+- How much generation metadata should be visible in the normal interface?
+- Should rejected takes remain indefinitely or support configurable cleanup?
+- Is a storyboard view required, or is an ordered scene list sufficient initially?
+- Should project duplication be part of Version 1?
+- Should BixciBox create portable project folders that can be moved between computers?
 
 These questions should be resolved according to the minimum useful workflow rather than by attempting to anticipate every future use case.
 
@@ -638,14 +638,14 @@ These questions should be resolved according to the minimum useful workflow rath
 
 Phase 0.2 is complete when:
 
-* The Version 1 goal is accepted.
-* The minimum useful workflow is accepted.
-* Required capabilities are identified.
-* Deferred capabilities are identified.
-* Version 1 non-goals are documented.
-* The definition of done is accepted.
-* Remaining implementation questions are assigned to later Phase 0 work rather than left ambiguous.
-* The BixciBox Project Compass is updated to reflect the approved Version 1 scope.
+- The Version 1 goal is accepted.
+- The minimum useful workflow is accepted.
+- Required capabilities are identified.
+- Deferred capabilities are identified.
+- Version 1 non-goals are documented.
+- The definition of done is accepted.
+- Remaining implementation questions are assigned to later Phase 0 work rather than left ambiguous.
+- The BixciBox Project Compass is updated to reflect the approved Version 1 scope.
 
 ---
 

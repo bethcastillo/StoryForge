@@ -1,6 +1,6 @@
 # BixciBox Architecture Overview
 
-**Document Status:** Draft
+**Document Status:** Active
 **Phase:** 0.3 - Architecture Overview
 **Parent Document:** `docs/BIXCIBOX_PROJECT_COMPASS.md`
 

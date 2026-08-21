@@ -1,6 +1,6 @@
 # BixciBox Project & Data Model
 
-**Document Status:** Draft
+**Document Status:** Active
 **Phase:** 0.4 - Project & Data Model
 **Parent Document:** `docs/BIXCIBOX_PROJECT_COMPASS.md`
 

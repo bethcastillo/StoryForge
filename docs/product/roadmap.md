@@ -1,6 +1,6 @@
 # BixciBox Development Roadmap
 
-**Document Status:** Draft
+**Document Status:** Active
 **Phase:** 0.5 - Development Roadmap
 **Parent Document:** `docs/BIXCIBOX_PROJECT_COMPASS.md`
 

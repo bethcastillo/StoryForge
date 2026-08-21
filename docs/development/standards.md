@@ -1,6 +1,6 @@
 # BixciBox Development Standards
 
-**Document Status:** Draft
+**Document Status:** Active
 **Phase:** 0.6 - Development Standards
 **Parent Document:** `docs/BIXCIBOX_PROJECT_COMPASS.md`
 
@@ -12,12 +12,12 @@ This document defines the development standards used while building BixciBox.
 
 Its purpose is to keep the codebase:
 
-* Understandable
-* Consistent
-* Testable
-* Maintainable
-* Documented
-* Safe to change
+- Understandable
+- Consistent
+- Testable
+- Maintainable
+- Documented
+- Safe to change
 
 These standards should guide day-to-day development decisions.
 
@@ -29,16 +29,16 @@ They are not intended to make development rigid or bureaucratic. They exist to p
 
 BixciBox development should follow these principles:
 
-* Prefer simple solutions over clever solutions.
-* Keep modules focused on one responsibility.
-* Avoid duplicating business logic.
-* Keep provider-specific logic isolated.
-* Keep UI code separate from core application logic where practical.
-* Preserve data integrity over convenience.
-* Write code that can be understood later without relying on memory.
-* Document important architectural decisions.
-* Add tests for important behavior and bug fixes.
-* Avoid introducing dependencies without a clear reason.
+- Prefer simple solutions over clever solutions.
+- Keep modules focused on one responsibility.
+- Avoid duplicating business logic.
+- Keep provider-specific logic isolated.
+- Keep UI code separate from core application logic where practical.
+- Preserve data integrity over convenience.
+- Write code that can be understood later without relying on memory.
+- Document important architectural decisions.
+- Add tests for important behavior and bug fixes.
+- Avoid introducing dependencies without a clear reason.
 
 ---
 
@@ -78,16 +78,16 @@ Source code should be grouped by responsibility rather than allowed to accumulat
 
 Examples of major areas may include:
 
-* Projects
-* Characters
-* Scenes
-* Assets
-* Prompts
-* Generation
-* Providers
-* Persistence
-* Shared UI components
-* Utilities
+- Projects
+- Characters
+- Scenes
+- Assets
+- Prompts
+- Generation
+- Providers
+- Persistence
+- Shared UI components
+- Utilities
 
 Large files should be split when they begin handling unrelated responsibilities.
 
@@ -101,30 +101,30 @@ Names should describe intent clearly.
 
 Avoid vague names such as:
 
-* `data`
-* `thing`
-* `stuff`
-* `temp`
-* `misc`
-* `helper2`
-* `newVersion`
+- `data`
+- `thing`
+- `stuff`
+- `temp`
+- `misc`
+- `helper2`
+- `newVersion`
 
 Prefer names such as:
 
-* `projectService`
-* `characterRepository`
-* `generationRequest`
-* `comfyUiProvider`
-* `assetRegistry`
+- `projectService`
+- `characterRepository`
+- `generationRequest`
+- `comfyUiProvider`
+- `assetRegistry`
 
 Names should remain consistent across the codebase.
 
 If the project uses JavaScript or TypeScript:
 
-* Variables and functions should use `camelCase`.
-* Components and classes should use `PascalCase`.
-* Constants may use `UPPER_SNAKE_CASE` where appropriate.
-* File naming should follow one consistent convention within each area.
+- Variables and functions should use `camelCase`.
+- Components and classes should use `PascalCase`.
+- Constants may use `UPPER_SNAKE_CASE` where appropriate.
+- File naming should follow one consistent convention within each area.
 
 ---
 
@@ -136,11 +136,11 @@ A function should generally perform one clear task.
 
 Avoid functions that:
 
-* Read project files
-* Modify UI state
-* Call ComfyUI
-* Create assets
-* Write logs
+- Read project files
+- Modify UI state
+- Call ComfyUI
+- Create assets
+- Write logs
 
 all in one place.
 
@@ -172,17 +172,17 @@ Provider-specific code must remain isolated from general BixciBox logic.
 
 For example:
 
-* ComfyUI workflow JSON handling belongs in the ComfyUI provider.
-* ComfyUI queue IDs belong in the ComfyUI provider.
-* ComfyUI endpoint details belong in the ComfyUI provider.
+- ComfyUI workflow JSON handling belongs in the ComfyUI provider.
+- ComfyUI queue IDs belong in the ComfyUI provider.
+- ComfyUI endpoint details belong in the ComfyUI provider.
 
 General BixciBox concepts such as:
 
-* Scene
-* Prompt
-* Take
-* Asset
-* Character
+- Scene
+- Prompt
+- Take
+- Asset
+- Character
 
 must not depend directly on ComfyUI-specific types or APIs.
 
@@ -196,12 +196,12 @@ Project persistence should prioritize safety and recoverability.
 
 Persistence code should:
 
-* Preserve stable entity IDs.
-* Avoid silent data loss.
-* Validate loaded project data.
-* Handle missing or invalid data gracefully.
-* Avoid partially overwriting a valid project with corrupted data.
-* Preserve version information needed for future migrations.
+- Preserve stable entity IDs.
+- Avoid silent data loss.
+- Validate loaded project data.
+- Handle missing or invalid data gracefully.
+- Avoid partially overwriting a valid project with corrupted data.
+- Preserve version information needed for future migrations.
 
 Changes to persistent project structure should be documented.
 
@@ -219,12 +219,12 @@ Errors should be categorized where practical.
 
 Examples include:
 
-* Validation errors
-* File-system errors
-* Persistence errors
-* Provider connection errors
-* Generation failures
-* Configuration errors
+- Validation errors
+- File-system errors
+- Persistence errors
+- Provider connection errors
+- Generation failures
+- Configuration errors
 
 The application should convert low-level failures into meaningful higher-level errors.
 
@@ -244,17 +244,17 @@ Important technical events should be logged.
 
 Examples include:
 
-* Application startup
-* Project creation
-* Project open
-* Project save
-* Project load failure
-* Provider connection attempts
-* Generation submission
-* Generation completion
-* Generation failure
-* File-system errors
-* Unexpected exceptions
+- Application startup
+- Project creation
+- Project open
+- Project save
+- Project load failure
+- Provider connection attempts
+- Generation submission
+- Generation completion
+- Generation failure
+- File-system errors
+- Unexpected exceptions
 
 Logs should contain enough information to diagnose problems without becoming unnecessarily noisy.
 
@@ -268,16 +268,16 @@ Testing should focus on behavior that would be costly or frustrating to break.
 
 At minimum, important tests should cover:
 
-* Project creation
-* Project save/load
-* Entity ID preservation
-* Scene ordering
-* Character persistence
-* Asset registration
-* Prompt persistence
-* Generation request state
-* Take approval/rejection
-* Provider failure handling
+- Project creation
+- Project save/load
+- Entity ID preservation
+- Scene ordering
+- Character persistence
+- Asset registration
+- Prompt persistence
+- Generation request state
+- Take approval/rejection
+- Provider failure handling
 
 Critical project-state behavior should not rely only on manual testing.
 
@@ -289,12 +289,12 @@ Unit tests should be used for isolated logic.
 
 Examples include:
 
-* Validation functions
-* Project transformations
-* Scene ordering logic
-* Status transitions
-* Provider request mapping
-* Utility functions
+- Validation functions
+- Project transformations
+- Scene ordering logic
+- Status transitions
+- Provider request mapping
+- Utility functions
 
 Unit tests should be fast and deterministic where practical.
 
@@ -306,10 +306,10 @@ Integration tests should verify that major components work together.
 
 Examples include:
 
-* Saving and reopening a project
-* Registering an asset and recovering it after reload
-* Submitting a generation request through the provider abstraction
-* Converting a provider result into a Take and Asset
+- Saving and reopening a project
+- Registering an asset and recovering it after reload
+- Submitting a generation request through the provider abstraction
+- Converting a provider result into a Take and Asset
 
 External providers may be mocked where necessary for reliable automated tests.
 
@@ -329,13 +329,13 @@ This helps prevent the same bug from returning later.
 
 Manual testing remains important for:
 
-* UI behavior
-* Visual layout
-* Drag-and-drop interactions
-* File selection
-* Provider connection behavior
-* Generation workflows
-* Error messages
+- UI behavior
+- Visual layout
+- Drag-and-drop interactions
+- File selection
+- Provider connection behavior
+- Generation workflows
+- Error messages
 
 Manual testing should supplement automated testing, not replace it for critical logic.
 
@@ -345,14 +345,14 @@ Manual testing should supplement automated testing, not replace it for critical 
 
 Before considering a meaningful change complete, review it for:
 
-* Correctness
-* Readability
-* Scope
-* Error handling
-* Test coverage
-* Documentation impact
-* Unnecessary duplication
-* Architectural boundary violations
+- Correctness
+- Readability
+- Scope
+- Error handling
+- Test coverage
+- Documentation impact
+- Unnecessary duplication
+- Architectural boundary violations
 
 Even when development is performed by one person, a deliberate review pass should occur before the change is treated as finished.
 
@@ -364,13 +364,13 @@ New third-party dependencies should be added only when they provide clear value.
 
 Before adding a dependency, consider:
 
-* What problem does it solve?
-* Can existing tools solve the problem adequately?
-* Is the library actively maintained?
-* Is the dependency stable?
-* Does it significantly increase application size or complexity?
-* Does it introduce licensing concerns?
-* Would replacing it later be difficult?
+- What problem does it solve?
+- Can existing tools solve the problem adequately?
+- Is the library actively maintained?
+- Is the dependency stable?
+- Does it significantly increase application size or complexity?
+- Does it introduce licensing concerns?
+- Would replacing it later be difficult?
 
 Avoid adding libraries for very small tasks that can be implemented safely and clearly in a few lines.
 
@@ -382,13 +382,13 @@ Documentation is part of the development process.
 
 Documentation should be updated when changes affect:
 
-* Product scope
-* Architecture
-* Persistent data
-* Provider behavior
-* Setup instructions
-* Development workflow
-* Major feature behavior
+- Product scope
+- Architecture
+- Persistent data
+- Provider behavior
+- Setup instructions
+- Development workflow
+- Major feature behavior
 
 The Project Compass should remain a high-level navigation and status document.
 
@@ -402,14 +402,14 @@ Significant technical decisions should be documented using Architecture Decision
 
 An ADR should be created when a decision:
 
-* Has long-term architectural impact
-* Is difficult to reverse
-* Affects multiple modules
-* Introduces an important dependency
-* Changes persistence strategy
-* Changes provider architecture
-* Changes application packaging
-* Changes a previously accepted architecture decision
+- Has long-term architectural impact
+- Is difficult to reverse
+- Affects multiple modules
+- Introduces an important dependency
+- Changes persistence strategy
+- Changes provider architecture
+- Changes application packaging
+- Changes a previously accepted architecture decision
 
 ADRs should be stored under:
 
@@ -460,11 +460,11 @@ For larger or riskier changes, use a separate branch.
 
 Examples include:
 
-* Persistence redesign
-* Provider integration
-* Major UI restructuring
-* Project-format migration
-* Large refactoring
+- Persistence redesign
+- Provider integration
+- Major UI restructuring
+- Project-format migration
+- Large refactoring
 
 The branching strategy may become more formal as the project grows.
 
@@ -476,15 +476,15 @@ A development task should not be considered complete merely because the code run
 
 A meaningful task is complete when, where applicable:
 
-* The intended behavior works.
-* Relevant errors are handled.
-* Existing behavior is not broken.
-* Tests pass.
-* New tests are added where appropriate.
-* Documentation is updated if necessary.
-* No temporary debug code remains.
-* No known critical issue is being silently ignored.
-* The change fits the current architecture and roadmap.
+- The intended behavior works.
+- Relevant errors are handled.
+- Existing behavior is not broken.
+- Tests pass.
+- New tests are added where appropriate.
+- Documentation is updated if necessary.
+- No temporary debug code remains.
+- No known critical issue is being silently ignored.
+- The change fits the current architecture and roadmap.
 
 ---
 
@@ -496,9 +496,9 @@ However, experimental code should be clearly identified.
 
 It should either:
 
-* Be removed after the experiment
-* Be rewritten into production-quality code
-* Be intentionally adopted and documented
+- Be removed after the experiment
+- Be rewritten into production-quality code
+- Be intentionally adopted and documented
 
 Experimental code should not quietly become permanent architecture.
 
@@ -545,12 +545,12 @@ Even though Version 1 is local-first, basic security practices still apply.
 
 BixciBox should:
 
-* Validate file paths.
-* Avoid executing arbitrary project content.
-* Treat imported files as untrusted input.
-* Avoid exposing local services unnecessarily.
-* Keep secrets out of logs.
-* Avoid storing credentials directly inside project files unless specifically designed and protected.
+- Validate file paths.
+- Avoid executing arbitrary project content.
+- Treat imported files as untrusted input.
+- Avoid exposing local services unnecessarily.
+- Keep secrets out of logs.
+- Avoid storing credentials directly inside project files unless specifically designed and protected.
 
 More advanced security requirements may be added if cloud or collaboration features are introduced later.
 
@@ -562,10 +562,10 @@ Performance optimization should be driven by observed problems rather than specu
 
 However, BixciBox should avoid obviously wasteful behavior such as:
 
-* Reloading entire projects unnecessarily
-* Duplicating large asset files without reason
-* Blocking the UI during generation
-* Recomputing expensive data repeatedly when a simple cache is appropriate
+- Reloading entire projects unnecessarily
+- Duplicating large asset files without reason
+- Blocking the UI during generation
+- Recomputing expensive data repeatedly when a simple cache is appropriate
 
 Correctness and maintainability should come before premature optimization.
 
@@ -587,9 +587,9 @@ These standards may evolve as BixciBox grows.
 
 A standard should be changed when:
 
-* It no longer fits the architecture
-* It creates unnecessary friction
-* A recurring development problem reveals a missing rule
-* Tooling changes make the existing rule obsolete
+- It no longer fits the architecture
+- It creates unnecessary friction
+- A recurring development problem reveals a missing rule
+- Tooling changes make the existing rule obsolete
 
 Changes should improve clarity and maintainability rather than add ceremony for its own sake.
